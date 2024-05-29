@@ -1,11 +1,6 @@
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +19,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifyThatEmptyMatrixHasNoSaddlePoints() {
         Matrix matrix = new Matrix(new ArrayList<>());
@@ -34,7 +28,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifyLackOfSaddlePointsWhenThereAreNone() {
         Matrix matrix = new Matrix(Arrays.asList(
@@ -48,7 +41,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifyMultipleSaddlePointsInAColumn() {
         Matrix matrix = new Matrix(Arrays.asList(
@@ -66,7 +58,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifyMultipleSaddlePointsInARow() {
         Matrix matrix = new Matrix(Arrays.asList(
@@ -84,7 +75,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifySaddlePointInBottomRightCorner() {
         Matrix matrix = new Matrix(Arrays.asList(
@@ -98,7 +88,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifySaddlePointsInANonSquareMatrix() {
         Matrix matrix = new Matrix(Arrays.asList(
@@ -114,7 +103,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifyThatSaddlePointsInASingleColumnMatrixAreThoseWithMinimumValue() {
         Matrix matrix = new Matrix(Arrays.asList(
@@ -132,7 +120,6 @@ public class MatrixTest {
         assertThat(matrix.getSaddlePoints()).isEqualTo(expectedSaddlePoints);
     }
 
-    @Disabled("Remove to run test")
     @Test
     public void testCanIdentifyThatSaddlePointsInASingleRowMatrixAreThoseWithMaximumValue() {
         Matrix matrix = new Matrix(Arrays.asList(
