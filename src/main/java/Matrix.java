@@ -1,34 +1,57 @@
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 class Matrix {
 
-    private final List<List<Integer>> values;
+    private record pointsOfInterest (int value, Set<MatrixCoordinate> elements) {}
+
+    private final List<List<Integer>> matrix;
+    private final Map<Integer, pointsOfInterest> rowMax = new HashMap<>();
+    private final Map<Integer, pointsOfInterest> colMin = new HashMap<>();
+
 
     Matrix(List<List<Integer>> values) {
-        this.values = Collections.unmodifiableList(values);
+        this.matrix = values;
     }
 
     Set<MatrixCoordinate> getSaddlePoints() {
-        Set<MatrixCoordinate> saddlePoints = new HashSet<>();
-        for (int y = 0; y < values.size(); y++) {
-            List<Integer> row = values.get(y);
-            int highestValueInRow = row.stream().max(Integer::compare).orElseThrow();
-            for (int x = 0; x < row.size(); x++) {
-                var candidate = row.get(x);
-                if (candidate == highestValueInRow && isLowestVertical(x, candidate))
-                        saddlePoints.add(new MatrixCoordinate(y + 1, x + 1));
-            }
-        }
-        return saddlePoints;
+        getRowMaxAndColMin();
+        var maximumPoints = rowMax.values().stream().flatMap(p -> p.elements.stream()).collect(Collectors.toSet());
+        var minimumPoints = colMin.values().stream().flatMap(p -> p.elements.stream()).collect(Collectors.toSet());
+        return maximumPoints.stream().filter(minimumPoints::contains).collect(Collectors.toSet());
     }
 
-    private boolean isLowestVertical(int col, int candidate) {
-        return values.stream()
-                .mapToInt(row -> row.get(col))
-                .allMatch(value -> value >= candidate);
+    private void getRowMaxAndColMin() {
+        for (int rowIndex = 0; rowIndex < matrix.size(); rowIndex++) {
+            var row = matrix.get(rowIndex);
+            for (int colIndex = 0; colIndex < row.size(); colIndex++) {
+                int value = row.get(colIndex);
+                var coordinate = new MatrixCoordinate(rowIndex + 1, colIndex + 1);
+                checkRowMax(rowIndex, value, coordinate);
+                checkColMin(colIndex, value, coordinate);
+            }
+        }
     }
+
+    private void checkColMin(int colIndex, Integer value, MatrixCoordinate coordinate) {
+        var min = colMin.getOrDefault(colIndex, new pointsOfInterest(value, new HashSet<>()));
+        if (value < min.value) {
+            min = new pointsOfInterest(value, new HashSet<>(List.of(coordinate)));
+        } else if (value == min.value) {
+            min.elements.add(coordinate);
+        }
+        colMin.put(colIndex, min);
+    }
+
+    private void checkRowMax(int rowIndex, Integer value, MatrixCoordinate coordinate) {
+        var max = rowMax.getOrDefault(rowIndex, new pointsOfInterest(value, new HashSet<>()));
+        if (value > max.value) {
+            max = new pointsOfInterest(value, new HashSet<>(List.of(coordinate)));
+        } else if (value == max.value) {
+            max.elements.add(coordinate);
+        }
+        rowMax.put(rowIndex, max);
+    }
+
 
 }
