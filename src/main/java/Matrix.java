@@ -3,62 +3,59 @@ import java.util.stream.Collectors;
 
 class Matrix {
 
-    private record PointsOfInterest(int value, Set<MatrixCoordinate> elements) {}
+    private record Coordinate(int row, int col) {
+
+        public MatrixCoordinate toMatrixCoordinate() {
+                return new MatrixCoordinate(row, col);
+            }
+        }
 
     private final List<List<Integer>> matrix;
-    private final Map<Integer, PointsOfInterest> rowMax = new HashMap<>();
-    private final Map<Integer, PointsOfInterest> colMin = new HashMap<>();
-
 
     Matrix(List<List<Integer>> values) {
         this.matrix = values;
     }
 
     Set<MatrixCoordinate> getSaddlePoints() {
-        computeRowMaxAndColMin();
-        return getPointsOfInterest(rowMax).stream()
-                .filter(getPointsOfInterest(colMin)::contains)
-                .collect(Collectors.toSet());
-    }
+        if (matrix.isEmpty()) return Collections.emptySet();
 
-    private void computeRowMaxAndColMin() {
-        for (int rowIndex = 0; rowIndex < matrix.size(); rowIndex++) {
-            var row = matrix.get(rowIndex);
-            for (int colIndex = 0; colIndex < row.size(); colIndex++) {
-                updateColAndRow(row, colIndex, rowIndex);
+        var rowMaxes = generateRowMaxes();
+        var colMins = generateColMins();
+
+        List<Coordinate> saddlePoints = new ArrayList<>();
+        for (int r = 0; r < rowMaxes.length; r++) {
+            final int row = r + 1;
+            for (int c = 0; c < colMins.length; c++) {
+                final int col = c + 1;
+                int value = matrix.get(r).get(c);
+                if (value > rowMaxes[r]) {
+                    rowMaxes[r] = value;
+                    saddlePoints.removeIf(p -> p.row() == row);
+                }
+                if (value < colMins[c]) {
+                    colMins[c] = value;
+                    saddlePoints.removeIf(p -> p.col() == col);
+                }
+                if (value == rowMaxes[r] && value == colMins[c])
+                    saddlePoints.add(new Coordinate(row, col));
             }
         }
-    }
 
-    private Set<MatrixCoordinate> getPointsOfInterest(Map<Integer, PointsOfInterest> rowMax) {
-        return rowMax.values()
-                .stream()
-                .flatMap(p -> p.elements.stream())
+        return saddlePoints
+                .parallelStream()
+                .map(Coordinate::toMatrixCoordinate)
                 .collect(Collectors.toSet());
     }
 
-    private void updateColAndRow(List<Integer> row, int colIndex, int rowIndex) {
-        int value = row.get(colIndex);
-        var coordinate = new MatrixCoordinate(rowIndex + 1, colIndex + 1);
-        updateColMin(colIndex, value, coordinate);
-        updateRowMax(rowIndex, value, coordinate);
+    private int[] generateColMins() {
+        int[] colMins = new int[matrix.get(0).size()];
+        Arrays.fill(colMins, Integer.MAX_VALUE);
+        return colMins;
     }
 
-    private void updateColMin(int colIndex, int value, MatrixCoordinate coordinate) {
-        var min = colMin.get(colIndex);
-        if (min == null || value < min.value) min = new PointsOfInterest(value, new HashSet<>());
-        if (value == min.value) min.elements.add(coordinate);
-        colMin.put(colIndex, min);
+    private int[] generateRowMaxes() {
+        int[] rowMaxes = new int[matrix.size()];
+        Arrays.fill(rowMaxes, Integer.MIN_VALUE);
+        return rowMaxes;
     }
-
-    private void updateRowMax(int rowIndex, int value, MatrixCoordinate coordinate) {
-        var max = rowMax.get(rowIndex);
-        if (max == null || value > max.value) max = new PointsOfInterest(value, new HashSet<>());
-        if (value == max.value) max.elements.add(coordinate);
-        rowMax.put(rowIndex, max);
-    }
-
-
-
-
 }
